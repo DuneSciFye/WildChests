@@ -188,8 +188,8 @@ public class WildChestBlockEntity extends ChestBlockEntity implements WorldlyCon
             double z = blockPos.getZ() + level.getRandom().nextFloat();
             for (String particle : chestData.getChestParticles()) {
                 try {
-                    //this.serverLevel.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)),
-                           // x, y, z, 0, 0.0, 0.0, 0.0, 1.0, false);
+                    this.serverLevel.sendParticles(null, CraftParticle.toNMS(Particle.valueOf(particle)),
+                            x, y, z, 0, 0.0, 0.0, 0.0, 1.0, false);
                 } catch (Exception ignored) {
                 }
             }
@@ -215,13 +215,15 @@ public class WildChestBlockEntity extends ChestBlockEntity implements WorldlyCon
 
                 org.bukkit.inventory.ItemStack[] itemsToAdd = ChestUtils.fixItemStackAmount(
                         itemStack, plugin.getProviders().getItemAmount(item));
-
+                if (item.getItemStack().hasItemMeta() && item.getItemStack().getItemMeta().hasDisplayName()) {
+                    continue;
+                }
                 Map<Integer, org.bukkit.inventory.ItemStack> leftOvers = chest.addItems(itemsToAdd);
 
                 if (leftOvers.isEmpty()) {
-                    //this.serverLevel.sendParticles(null, CraftParticle.toNMS(Particle.CLOUD),
-                            //itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(),
-                            //0, 0.0, 0.0, 0.0, 1.0, false);
+                    this.serverLevel.sendParticles(null, CraftParticle.toNMS(Particle.CLOUD),
+                            itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(),
+                            0, 0.0, 0.0, 0.0, 1.0, false);
                     itemEntity.discard();
                 } else {
                     Counter leftOverCount = new Counter();
