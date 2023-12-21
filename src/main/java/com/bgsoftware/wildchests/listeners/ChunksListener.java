@@ -5,6 +5,7 @@ import com.bgsoftware.wildchests.objects.chests.WChest;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,21 +31,26 @@ public final class ChunksListener implements Listener {
     }
 
     public static void handleChunkLoad(WildChestsPlugin plugin, Chunk chunk){
-        plugin.getChestsManager().loadChestsForChunk(chunk);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getChestsManager().loadChestsForChunk(chunk);
 
-        plugin.getChestsManager().getChests(chunk).forEach(chest -> {
-            Location location = chest.getLocation();
-            Material blockType = location.getBlock().getType();
-            if(blockType != Material.CHEST){
-                WildChestsPlugin.log("Loading chunk " + chunk.getX() + ", " + chunk.getX() + " but found a chest not " +
-                        "associated with a chest block but " + blockType + " at " + location.getWorld().getName() + ", " +
-                        location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
-                chest.remove();
+                plugin.getChestsManager().getChests(chunk).forEach(chest -> {
+                    Location location = chest.getLocation();
+                    Material blockType = location.getBlock().getType();
+                    if(blockType != Material.CHEST){
+                        WildChestsPlugin.log("Loading chunk " + chunk.getX() + ", " + chunk.getX() + " but found a chest not " +
+                                "associated with a chest block but " + blockType + " at " + location.getWorld().getName() + ", " +
+                                location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
+                        chest.remove();
+                    }
+                    else{
+                        ((WChest) chest).onChunkLoad();
+                    }
+                });
             }
-            else{
-                ((WChest) chest).onChunkLoad();
-            }
-        });
+        }.runTaskLater(plugin, 5l);
     }
 
 }
